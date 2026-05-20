@@ -1,0 +1,6 @@
+{
+  "name": "Interior Design Portfolio & Marketing System",
+  "description": "منصة متكاملة ومحترفة للمصممين الداخليين لعرض المشاريع (شقق، محلات، مكاتب) وإدارة وإطلاق الحملات الإعلانية مع تحليلات وتتبع متقدم وحفاز للذكاء الاصطناعي لكتابة المحتوى الإعلاني.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

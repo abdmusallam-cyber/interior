@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-gold-50: #fbf7ee;
+  --color-gold-100: #f4ea6c;
+  --color-gold-200: #ebd18f;
+  --color-gold-300: #dfb25d;
+  --color-gold-400: #d1943c;
+  --color-gold-500: #bc772a;
+  --color-gold-600: #a05a20;
+  --color-gold-700: #81421a;
+  --color-gold-800: #653116;
+  --color-gold-900: #4e2311;
+}
+
+/* Custom visual additions for high-contrast interior design theme */
+body {
+  font-family: var(--font-sans);
+  background-color: #faf9f6;
+  color: #1a1917;
+  direction: rtl; /* Elegant RTL default for Middle East Interior Design focus */
+}
+
+/* Base custom styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

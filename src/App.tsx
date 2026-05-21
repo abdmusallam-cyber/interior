@@ -141,39 +141,45 @@ export default function App() {
   // Initiate popup authentication flow
   const handleConnectFacebook = async () => {
     try {
-       const originParam = encodeURIComponent(window.location.origin);
-       let urlEndpoint = `/api/auth/facebook/url?origin=${originParam}&scope_type=${fbScopeType}`;
-       if (fbScopeType === "custom") {
-         urlEndpoint += `&custom_scopes=${encodeURIComponent(fbCustomScopes)}`;
-       }
-       const res = await fetch(urlEndpoint);
-       if (!res.ok) {
-         const errorText = await res.text().catch(() => "لا يوجد نص خطأ متاح.");
-         throw new Error(`Failed to get auth URL (${res.status} ${res.statusText}): ${errorText}`);
-       }
-       const { url } = await res.json();
-
-      // Open popup according to OAuth guideline rules
-      const authWindow = window.open(
-        url,
-        "facebook_oauth_popup",
-        "width=650,height=650,status=yes,resizable=yes"
-      );
-
+      // Open a blank popup immediately (must be triggered by user gesture)
+      const authWindow = window.open('', 'facebook_oauth_popup', 'width=650,height=650,status=yes,resizable=yes');
       if (!authWindow) {
         alert("🚨 تم حظر فتح النافذة المنبثقة! يرجى تفعيل فتح النوافذ المنبثقة للموقع لإجراء الدمج والربط بفيسبوك.");
-      } else {
-        setFbLogsCheck(prev => [
-          {
-            id: `log_${Date.now()}`,
-            time: new Date().toLocaleTimeString("ar-EG"),
-            type: "طلب OAuth",
-            info: "فتح بوابة التصاريح لفيسبوك ومطابقة الـ (App Scope)",
-            status: "قيد الانتظار ⏳"
-          },
-          ...prev
-        ]);
+        return;
       }
+
+      const originParam = encodeURIComponent(window.location.origin);
+      let urlEndpoint = `/api/auth/facebook/url?origin=${originParam}&scope_type=${fbScopeType}`;
+      if (fbScopeType === "custom") {
+        urlEndpoint += `&custom_scopes=${encodeURIComponent(fbCustomScopes)}`;
+      }
+
+      const res = await fetch(urlEndpoint);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "لا يوجد نص خطأ متاح.");
+        authWindow.close();
+        throw new Error(`Failed to get auth URL (${res.status} ${res.statusText}): ${errorText}`);
+      }
+      const { url } = await res.json();
+
+      // Redirect the already-open popup to the auth URL
+      try {
+        authWindow.location.href = url;
+      } catch (e) {
+        authWindow.close();
+        window.open(url, 'facebook_oauth_popup', 'width=650,height=650,status=yes,resizable=yes');
+      }
+
+      setFbLogsCheck(prev => [
+        {
+          id: `log_${Date.now()}`,
+          time: new Date().toLocaleTimeString("ar-EG"),
+          type: "طلب OAuth",
+          info: "فتح بوابة التصاريح لفيسبوك ومطابقة الـ (App Scope)",
+          status: "قيد الانتظار ⏳"
+        },
+        ...prev
+      ]);
     } catch (err: any) {
       alert("⚠️ فشل تحضير بوابة الاتصال: " + err.message);
     }
@@ -185,35 +191,40 @@ export default function App() {
     if (!ok) return;
 
     try {
+      // Open blank popup immediately
+      const authWindow = window.open('', 'facebook_oauth_popup_all_scopes', 'width=750,height=750,status=yes,resizable=yes');
+      if (!authWindow) {
+        alert("🚨 تم حظر فتح النافذة المنبثقة! يرجى تفعيل فتح النوافذ المنبثقة للموقع.");
+        return;
+      }
+
       const originParam = encodeURIComponent(window.location.origin);
       const urlEndpoint = `/api/auth/facebook/url?origin=${originParam}&scope_type=custom&custom_scopes=${encodeURIComponent(fbCustomScopes)}`;
       const res = await fetch(urlEndpoint);
       if (!res.ok) {
         const errorText = await res.text().catch(() => "لا يوجد نص خطأ متاح.");
+        authWindow.close();
         throw new Error(`Failed to get auth URL (${res.status} ${res.statusText}): ${errorText}`);
       }
       const { url } = await res.json();
 
-      const authWindow = window.open(
-        url,
-        "facebook_oauth_popup_all_scopes",
-        "width=750,height=750,status=yes,resizable=yes"
-      );
-
-      if (!authWindow) {
-        alert("🚨 تم حظر فتح النافذة المنبثقة! يرجى تفعيل فتح النوافذ المنبثقة للموقع.");
-      } else {
-        setFbLogsCheck(prev => [
-          {
-            id: `log_${Date.now()}`,
-            time: new Date().toLocaleTimeString("ar-EG"),
-            type: "طلب OAuth (كل الصلاحيات)",
-            info: "تم طلب كافة الصلاحيات عبر نافذة OAuth",
-            status: "قيد الانتظار ⏳"
-          },
-          ...prev
-        ]);
+      try {
+        authWindow.location.href = url;
+      } catch (e) {
+        authWindow.close();
+        window.open(url, 'facebook_oauth_popup_all_scopes', 'width=750,height=750,status=yes,resizable=yes');
       }
+
+      setFbLogsCheck(prev => [
+        {
+          id: `log_${Date.now()}`,
+          time: new Date().toLocaleTimeString("ar-EG"),
+          type: "طلب OAuth (كل الصلاحيات)",
+          info: "تم طلب كافة الصلاحيات عبر نافذة OAuth",
+          status: "قيد الانتظار ⏳"
+        },
+        ...prev
+      ]);
     } catch (err: any) {
       alert("⚠️ فشل تحضير بوابة الاتصال: " + err.message);
     }

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>نجاح الربط - Interior</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;background:#f9fafb;color:#0f172a;padding:24px} .card{max-width:680px;margin:40px auto;background:white;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06);text-align:center}</style>
+</head>
+<body>
+  <div class="card">
+    <h2>تم الربط بنجاح (محاكاة)</h2>
+    <p>ستنغلق النافذة وستعود لمحرّك التطبيق. إذا لم تُغلق، اضغط الزر أدناه.</p>
+    <button id="close" style="background:#10b981;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer">اغلق النافذة</button>
+  </div>
+
+  <script>
+    function notifyParent() {
+      if (window.opener) {
+        window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS', payload: { simulated: true, provider: 'facebook', connected: true, count: 2 } }, '*');
+        setTimeout(() => window.close(), 800);
+      } else {
+        document.body.insertAdjacentHTML('beforeend','<p style="text-align:center;color:#6b7280;margin-top:12px">لا يوجد نافذة أصلية لاستقبال الرسالة.</p>');
+      }
+    }
+    window.addEventListener('load', notifyParent);
+    document.getElementById('close').addEventListener('click', notifyParent);
+  </script>
+</body>
+</html>

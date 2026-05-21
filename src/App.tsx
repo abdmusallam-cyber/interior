@@ -168,14 +168,18 @@ export default function App() {
          }
        } else {
          // Full-page redirect fallback when popup is blocked
+         setFbLogsCheck(prev => [
+          {
+            id: `log_${Date.now()}`,
+            time: new Date().toLocaleTimeString("ar-EG"),
+            type: "طلب OAuth",
+            info: "فتح بوابة التصاريح لفيسبوك ومطابقة الـ (App Scope) - إعادة توجيه كامل الصفحة",
+            status: "قيد الانتظار ⏳"
+          },
+          ...prev
+        ]);
          window.location.href = url;
-          time: new Date().toLocaleTimeString("ar-EG"),
-          type: "طلب OAuth",
-          info: "فتح بوابة التصاريح لفيسبوك ومطابقة الـ (App Scope)",
-          status: "قيد الانتظار ⏳"
-        },
-        ...prev
-      ]);
+       }
     } catch (err: any) {
       alert("⚠️ فشل تحضير بوابة الاتصال: " + err.message);
     }
@@ -210,12 +214,18 @@ export default function App() {
          }
        } else {
          // Full-page redirect fallback when popup is blocked
+         setFbLogsCheck(prev => [
+          {
+            id: `log_${Date.now()}`,
+            time: new Date().toLocaleTimeString("ar-EG"),
+            type: "طلب OAuth",
+            info: "تم طلب كافة الصلاحيات عبر نافذة OAuth - إعادة توجيه كامل الصفحة",
+            status: "قيد الانتظار ⏳"
+          },
+          ...prev
+        ]);
          window.location.href = url;
-          info: "تم طلب كافة الصلاحيات عبر نافذة OAuth",
-          status: "قيد الانتظار ⏳"
-        },
-        ...prev
-      ]);
+       }
     } catch (err: any) {
       alert("⚠️ فشل تحضير بوابة الاتصال: " + err.message);
     }

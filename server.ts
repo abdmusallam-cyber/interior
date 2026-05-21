@@ -105,20 +105,28 @@ async function startServer() {
 
     // Dynamic scopes customization
     let scopesList = ["public_profile", "email", "pages_show_list"];
-    
+
+    // If user requests a custom set of scopes from the front-end, use them.
     if (scopeType === "custom" && req.query.custom_scopes) {
       scopesList = (req.query.custom_scopes as string)
         .split(",")
         .map(s => s.trim())
         .filter(Boolean);
     } else if (scopeType === "business" || scopeType === "standard") {
-      // Use exactly what is verified to work without triggering scope review errors
+      // Business/standard preset: include common Facebook + Instagram + Ads scopes
+      // NOTE: Some of these scopes require App Review in production.
       scopesList = [
         "public_profile",
         "email",
         "pages_show_list",
         "pages_read_engagement",
-        "pages_manage_posts"
+        "pages_manage_posts",
+        "instagram_basic",
+        "instagram_content_publish",
+        "ads_read",
+        "ads_management",
+        "business_management",
+        "pages_manage_ads"
       ];
     }
     

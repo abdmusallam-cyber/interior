@@ -3,7 +3,7 @@ import {
   Sparkles, Plus, Search, Filter, TrendingUp, Target, Compass, 
   Users, Layers, Settings, Link2, Code, Copy, Check, Eye, 
   Activity, Briefcase, Percent, DollarSign, Globe, Trash, Play, 
-  Pause, ChevronLeft, MapPin, CheckCircle, Clock, AlertCircle, ClipboardList,
+  Pause, ChevronLeft, MapPin, CheckCircle, Clock, AlertCircle, ClipboardList, ShieldCheck,
   Facebook, Instagram
 } from "lucide-react";
 import { DEFAULT_PROJECTS, DEFAULT_CAMPAIGNS, DEFAULT_LEADS, DEFAULT_PIXELS } from "./data";
@@ -52,7 +52,9 @@ export default function App() {
 
   const [selectedFbPage, setSelectedFbPage] = useState<string>("");
   const [fbScopeType, setFbScopeType] = useState<"standard" | "business" | "custom">("standard");
-  const [fbCustomScopes, setFbCustomScopes] = useState<string>("public_profile,pages_show_list,pages_read_engagement,pages_manage_posts");
+  const [fbCustomScopes, setFbCustomScopes] = useState<string>(
+    "public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish,ads_read,ads_management,business_management,pages_manage_ads"
+  );
   const [isPublishingFb, setIsPublishingFb] = useState(false);
   const [fbPublishMessage, setFbPublishMessage] = useState("");
   const [fbLogsCheck, setFbLogsCheck] = useState<Array<{ id: string; time: string; type: string; info: string; status: string }>>([
@@ -145,7 +147,10 @@ export default function App() {
          urlEndpoint += `&custom_scopes=${encodeURIComponent(fbCustomScopes)}`;
        }
        const res = await fetch(urlEndpoint);
-       if (!res.ok) throw new Error("Failed to get auth URL");
+       if (!res.ok) {
+         const errorText = await res.text().catch(() => "لا يوجد نص خطأ متاح.");
+         throw new Error(`Failed to get auth URL (${res.status} ${res.statusText}): ${errorText}`);
+       }
        const { url } = await res.json();
 
       // Open popup according to OAuth guideline rules
@@ -164,6 +169,46 @@ export default function App() {
             time: new Date().toLocaleTimeString("ar-EG"),
             type: "طلب OAuth",
             info: "فتح بوابة التصاريح لفيسبوك ومطابقة الـ (App Scope)",
+            status: "قيد الانتظار ⏳"
+          },
+          ...prev
+        ]);
+      }
+    } catch (err: any) {
+      alert("⚠️ فشل تحضير بوابة الاتصال: " + err.message);
+    }
+  };
+
+  // Request all permissions (forces custom scopes to the full list)
+  const handleRequestAllPermissions = async () => {
+    const ok = confirm("ستطلب هذه العملية كافة صلاحيات Facebook/Instagram وAds. بعض الصلاحيات تتطلب App Review من فيسبوك قبل العمل في الإنتاج. المتابعة؟");
+    if (!ok) return;
+
+    try {
+      const originParam = encodeURIComponent(window.location.origin);
+      const urlEndpoint = `/api/auth/facebook/url?origin=${originParam}&scope_type=custom&custom_scopes=${encodeURIComponent(fbCustomScopes)}`;
+      const res = await fetch(urlEndpoint);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "لا يوجد نص خطأ متاح.");
+        throw new Error(`Failed to get auth URL (${res.status} ${res.statusText}): ${errorText}`);
+      }
+      const { url } = await res.json();
+
+      const authWindow = window.open(
+        url,
+        "facebook_oauth_popup_all_scopes",
+        "width=750,height=750,status=yes,resizable=yes"
+      );
+
+      if (!authWindow) {
+        alert("🚨 تم حظر فتح النافذة المنبثقة! يرجى تفعيل فتح النوافذ المنبثقة للموقع.");
+      } else {
+        setFbLogsCheck(prev => [
+          {
+            id: `log_${Date.now()}`,
+            time: new Date().toLocaleTimeString("ar-EG"),
+            type: "طلب OAuth (كل الصلاحيات)",
+            info: "تم طلب كافة الصلاحيات عبر نافذة OAuth",
             status: "قيد الانتظار ⏳"
           },
           ...prev
@@ -1899,6 +1944,16 @@ export default function App() {
                     >
                       <Link2 className="w-4 h-4 ml-1" />
                       <span>ربط حساب فيسبوك & إنستجرام 👥</span>
+                    </button>
+                  ) : null}
+                  {!fbConfig.isConnected ? (
+                    <button
+                      onClick={handleRequestAllPermissions}
+                      className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-black py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 transform hover:scale-[1.02] cursor-pointer"
+                      title="يطلب جميع صلاحيات فيسبوك/إنستجرام وإعلانات - بعض الصلاحيات تتطلب App Review"
+                    >
+                      <ShieldCheck className="w-4 h-4 ml-1" />
+                      <span>طلب كل الصلاحيات ⚠️</span>
                     </button>
                   ) : (
                     <div className="flex items-center gap-2 justify-end">
